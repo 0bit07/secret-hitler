@@ -1,6 +1,6 @@
 import './style.css' // Optional if vite generated it, otherwise ignore
 // We don't have style.css, but index.html has inline styles.
-
+console.log('🔥 main.ts loaded – build timestamp:', new Date().toISOString());
 // Types
 type LogType = 'EVENT' | 'STATE_SYNC' | 'ERROR' | 'INFO';
 
@@ -60,6 +60,8 @@ function updateState(state: any) {
     // highlight unknown roles or sensitive info if present (should verify privacy)
 }
 
+console.log('VITE_WS_URL =', import.meta.env.VITE_WS_URL);
+
 function connect() {
     if (socket) {
         socket.close();
@@ -78,6 +80,7 @@ function connect() {
     log('INFO', `Connecting to ${url}...`);
 
     socket = new WebSocket(url);
+    alert(`Connecting to ${url}`);
 
     socket.onopen = () => {
         statusSpan.textContent = 'Connected';
