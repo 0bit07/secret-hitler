@@ -68,7 +68,13 @@ function connect() {
     currentRoomId = roomIdInput.value;
     currentPlayerId = playerIdInput.value;
 
-    const url = `ws://localhost:8080?roomId=${currentRoomId}&playerId=${currentPlayerId}`;
+    const WS_URL = import.meta.env.VITE_WS_URL;
+    if (!WS_URL) {
+        log('ERROR', 'VITE_WS_URL is not defined');
+        return;
+    }
+
+    const url = `${WS_URL}?roomId=${currentRoomId}&playerId=${currentPlayerId}`;
     log('INFO', `Connecting to ${url}...`);
 
     socket = new WebSocket(url);
@@ -106,11 +112,10 @@ function connect() {
                 updateState(msg.state);
             } else if (msg.type === 'ERROR') {
                 log('ERROR', msg.message || 'Unknown Server Error');
-                alert(`Server Error: ${msg.message}`);
             } else {
                 log('INFO', `Unknown Message: ${JSON.stringify(msg)}`);
             }
-        } catch (e) {
+        } catch {
             log('ERROR', `Failed to parse message: ${event.data}`);
         }
     };
