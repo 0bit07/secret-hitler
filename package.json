@@ -1,0 +1,31 @@
+{
+  "name": "secret-hitler-engine",
+  "version": "1.0.0",
+  "description": "Pure, server-side game engine for Secret Hitler board game",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "echo \"Tests to be implemented\" && exit 0"
+  },
+  "keywords": [
+    "secret-hitler",
+    "game-engine",
+    "reducer",
+    "state-machine"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@types/node": "^25.0.3",
+    "@types/redis": "^4.0.10",
+    "@types/ws": "^8.18.1",
+    "redis": "^5.10.0",
+    "ws": "^8.18.3"
+  }
+}
