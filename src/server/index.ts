@@ -1,6 +1,18 @@
 import { connectRedis, disconnectRedis } from './redisStore';
 import { SocketServer } from './socketServer';
 
+// Global Crash Handlers
+process.on('uncaughtException', (err) => {
+    console.error('🔥 UNCAUGHT EXCEPTION:', err);
+    // Optional: process.exit(1) if you want to force restart immediately, 
+    // but Railway/Docker often handles this better if we just log and let it die naturally or via future checks.
+    // For now, let's log it prominently.
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error('🔥 UNHANDLED PROMISE REJECTION:', reason);
+});
+
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8080;
 
 async function bootstrap() {

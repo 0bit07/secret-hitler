@@ -21,8 +21,8 @@ export class SocketServer {
     private async handleConnection(socket: WebSocket, req: IncomingMessage) {
         try {
             // Parse query params for simple auth/room selection
-            // ws://localhost:8080?roomId=...&playerId=...
-            const url = new URL(req.url || '', `http://${req.headers.host}`); // Host is needed for valid URL
+            // Use a hardcoded base URL for parsing req.url to avoid dependency on headers.host
+            const url = new URL(req.url || '', 'http://localhost');
             const roomId = url.searchParams.get('roomId');
             const playerId = url.searchParams.get('playerId');
 

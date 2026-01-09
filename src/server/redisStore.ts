@@ -6,17 +6,20 @@ import { mockRedisClient } from './mockRedisStore';
 // Note: In a real app, URL would come from env vars
 const useMock = process.env.USE_MOCK_REDIS === 'true';
 
-// @ts-ignore
-const redisClient = useMock
-    ? mockRedisClient
-    // @ts-ignore
-    : createClient({
-        url: process.env.REDIS_URL || 'redis://localhost:6379'
-    });
+let redisClient: any;
 
-if (!useMock) {
+if (useMock) {
+    console.log('🧪 Using Mock Redis Store');
+    redisClient = mockRedisClient;
+} else if (process.env.REDIS_URL) {
+    console.log(`🔗 Connecting to Redis at ${process.env.REDIS_URL}`);
+    redisClient = createClient({
+        url: process.env.REDIS_URL
+    });
     // @ts-ignore
     redisClient.on('error', (err) => console.error('Redis Client Error', err));
+} else {
+    throw new Error('❌ No Redis configuration found. Set REDIS_URL or USE_MOCK_REDIS=true');
 }
 
 let isConnected = false;
