@@ -32,3 +32,4 @@ coverage/
 
 # Redis
 *.rdb
+package-lock.json

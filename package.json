@@ -6,9 +6,13 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "build:client": "npm run build --prefix client",
+    "build:all": "npm run build && npm run build:client",
     "build:watch": "tsc --watch",
     "start": "node dist/server/index.js",
     "dev:server": "ts-node src/server/index.ts",
+    "dev:client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" --kill-others --names \"SERVER,CLIENT\" --prefix-colors \"blue,green\"",
     "test": "echo \"Tests to be implemented\" && exit 0"
   },
   "keywords": [
@@ -20,6 +24,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.0"
   },
@@ -27,6 +32,7 @@
     "@types/node": "^25.0.3",
     "@types/redis": "^4.0.10",
     "@types/ws": "^8.18.1",
+    "dotenv": "^17.2.3",
     "redis": "^5.10.0",
     "ws": "^8.18.3"
   }

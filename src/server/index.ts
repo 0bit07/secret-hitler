@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { connectRedis, disconnectRedis } from './redisStore';
 import { SocketServer } from './socketServer';
 
