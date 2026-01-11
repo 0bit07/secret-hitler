@@ -19,7 +19,9 @@ if (useMock) {
     // @ts-ignore
     redisClient.on('error', (err) => console.error('Redis Client Error', err));
 } else {
-    throw new Error('❌ No Redis configuration found. Set REDIS_URL or USE_MOCK_REDIS=true');
+    console.warn('⚠️  No Redis configuration found. Defaulting to In-Memory Mock Store.');
+    console.warn('    (For persistence, set REDIS_URL or USE_MOCK_REDIS=true)');
+    redisClient = mockRedisClient;
 }
 
 let isConnected = false;
