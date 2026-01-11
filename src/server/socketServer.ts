@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import { IncomingMessage } from 'http';
+import http, { IncomingMessage, ServerResponse } from 'http';
 import { URL } from 'url';
 import { RoomManager } from './roomManager';
 import { ActionHandler } from './actionHandler';
@@ -11,12 +11,12 @@ import { ClientMessage, ServerMessage } from './types';
 
 export class SocketServer {
     private wss: WebSocketServer;
-    private httpServer: ReturnType<typeof import('http').createServer>;
+    private httpServer: http.Server;
 
 
     constructor(port: number) {
         // 1. Create a standard HTTP server to handle Health Checks (Railway requires this)
-        this.httpServer = import('http').createServer((req, res) => {
+        this.httpServer = http.createServer((req: IncomingMessage, res: ServerResponse) => {
             if (req.method === 'GET' && req.url === '/health') {
                 res.writeHead(200);
                 res.end('OK');
