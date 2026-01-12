@@ -53,6 +53,13 @@ export class SocketServer {
 
             console.log(`Player ${playerId} joined room ${roomId}`);
 
+            // 🔥 DEBUG: Prove server → client messaging works
+            socket.send(JSON.stringify({
+                type: "EVENT",
+                event: { kind: "DEBUG", message: "Hello from server after connect" }
+            }));
+
+
             // 1. Register Connection
             RoomManager.addConnection(socket, playerId, roomId);
 
