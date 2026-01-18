@@ -31,9 +31,11 @@
   "dependencies": {
     "@types/node": "^25.0.3",
     "@types/redis": "^4.0.10",
+    "@types/uuid": "^10.0.0",
     "@types/ws": "^8.18.1",
     "dotenv": "^17.2.3",
     "redis": "^5.10.0",
+    "uuid": "^13.0.0",
     "ws": "^8.18.3"
   }
 }

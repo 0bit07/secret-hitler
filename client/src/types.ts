@@ -1,27 +1,18 @@
 /**
  * Core type definitions for Secret Hitler game engine
- * 
- * This file defines all the types needed for the game state, actions, and events.
- * Only three enums are used (Role, Phase, PolicyType) - all other concepts use
- * string unions for flexibility.
+ * Mirrored from server/src/engine/types.ts and server/src/server/types.ts
  */
 
 // ============================================================================
-// ENUMS (Minimal - only 3)
+// ENUMS
 // ============================================================================
 
-/**
- * Player roles in Secret Hitler
- */
 export enum Role {
     LIBERAL = 'LIBERAL',
     FASCIST = 'FASCIST',
     HITLER = 'HITLER',
 }
 
-/**
- * Game phases (Finite State Machine states)
- */
 export enum Phase {
     LOBBY = 'LOBBY',
     ROLE_REVEAL = 'ROLE_REVEAL',
@@ -34,16 +25,13 @@ export enum Phase {
     GAME_OVER = 'GAME_OVER',
 }
 
-/**
- * Policy types
- */
 export enum PolicyType {
     LIBERAL = 'LIBERAL',
     FASCIST = 'FASCIST',
 }
 
 // ============================================================================
-// STRING UNIONS (Flexible types)
+// PRIMITIVES
 // ============================================================================
 
 export type Party = 'liberal' | 'fascist';
@@ -56,7 +44,7 @@ export type WinReason =
     | 'hitler-killed';
 
 // ============================================================================
-// PLAYER
+// STATE
 // ============================================================================
 
 export interface Player {
@@ -67,108 +55,89 @@ export interface Player {
     alive: boolean;
     isPresident: boolean;
     isChancellor: boolean;
-    /** True if this player was President in the last government */
     wasPresident: boolean;
-    /** True if this player was Chancellor in the last government */
     wasChancellor: boolean;
     hasSeenRole: boolean;
     avatarId: string;
 }
 
-// ============================================================================
-// GAME STATE
-// ============================================================================
-
 export interface SecretHitlerGameState {
-    /** Current phase of the game */
     phase: Phase;
-
-    /** All players in the game */
     players: Player[];
-
-    /** Index of current Presidential candidate in players array */
-    presidentIndex: number;
-
-    /** ID of nominated Chancellor (null if not yet nominated) */
-    nominatedChancellor: string | null;
-
-    /** Votes cast in current election (playerId -> vote) */
-    votes: Record<string, Vote>;
-
-    /** Number of consecutive failed elections (0-2, resets on successful election) */
-    electionTracker: number;
-
-    /** Number of liberal policies enacted */
-    liberalPoliciesEnacted: number;
-
-    /** Number of fascist policies enacted */
-    fascistPoliciesEnacted: number;
-
-    /** 
-     * Policy deck (hidden from players)
-     * Initially 6 liberal + 11 fascist, shuffled
-     */
-    policyDeck: PolicyType[];
-
-    /** 
-     * Discarded policies (hidden from players)
-     */
-    discardPile: PolicyType[];
-
-    /**
-     * Policies currently in President's hand (3 policies drawn)
-     */
-    presidentHand: PolicyType[];
-
-    /**
-     * Policies currently in Chancellor's hand (2 policies after President discards)
-     */
-    chancellorHand: PolicyType[];
-
-    /**
-     * Active executive action type (if any)
-     */
-    pendingExecutiveAction: ExecutiveActionType | null;
-
-    /**
-     * Player ID being investigated (for investigate action)
-     */
-    investigatedPlayer: string | null;
-
-    /**
-     * Players who have been investigated (cannot be investigated again)
-     */
-    investigatedPlayers: string[];
-
-    /**
-     * Winner party (null if game ongoing)
-     */
-    winner: Party | null;
-
-    /**
-     * Reason for win/loss
-     */
-    winReason: WinReason | null;
-    ownerId: string | null;
-
-    /**
-     * Players in lobby (before game starts)
-     */
-    playersInLobby: Array<{ id: string; name: string; avatarId: string }>;
-
-    /**
-     * Number of players who have acknowledged their role.
-     * Game cannot proceed from ROLE_REVEAL until this equals player count.
-     */
+    ownerId?: string;
+    playersInLobby: { id: string, name: string, avatarId: string }[];
     roleAcknowledgementCount: number;
+
+    presidentIndex: number;
+    nominatedChancellor: string | null;
+    votes: Record<string, Vote>;
+    // Election Tracker (0-3)
+    electionTracker: number;
+    liberalPoliciesEnacted: number;
+    fascistPoliciesEnacted: number;
+    // Client sees these as potentially undefined or hidden if not sanitized properly, 
+    // but the type definition strictly follows the server shape.
+    // However, the `sanitizeStateForPlayer` utility on the server may strip these.
+    // For TypeScript safety, we'll keep them optional or strict based on what we expect the server to send.
+    // The server sends `Partial<GameState>` effectively.
+    // Let's copy the full shape but assume we receive sanitized versions.
+
+    policyDeck?: PolicyType[]; // Hidden
+    discardPile?: PolicyType[]; // Hidden
+    presidentHand?: PolicyType[]; // Hidden/Private
+    chancellorHand?: PolicyType[]; // Hidden/Private
+
+    pendingExecutiveAction: ExecutiveActionType | null;
+    investigatedPlayer: string | null;
+    investigatedPlayers: string[];
+    winner: Party | null;
+    winReason: WinReason | null;
+}
+
+export type GameState = SecretHitlerGameState; // Alias for backward compatibility if needed, but we should switch
+
+// ============================================================================
+// PLATFORM STATE
+// ============================================================================
+
+export enum PlatformPhase {
+    JOIN = 'JOIN',
+    AVATAR_SELECT = 'AVATAR_SELECT',
+    LOBBY = 'LOBBY',
+    GAME_SELECT = 'GAME_SELECT',
+    GAME_VOTE = 'GAME_VOTE',
+    READY = 'READY',
+    IN_GAME = 'IN_GAME',
+    GAME_OVER = 'GAME_OVER'
+}
+
+export interface PlatformPlayer {
+    id: string;
+    name: string;
+    avatarId: string;
+    isReady: boolean;
+    isHost: boolean;
+}
+
+export interface RoomState {
+    id: string; // Room Code
+    phase: PlatformPhase;
+    players: PlatformPlayer[];
+    activeGame?: {
+        gameId: 'secret-hitler';
+        gameState: SecretHitlerGameState;
+    };
+    gameVotes: Record<string, string>;
+    ownerId: string;
+    createdAt: number;
 }
 
 // ============================================================================
-// ACTIONS (Discriminated Union)
+// ACTIONS
 // ============================================================================
 
 export type Action =
-    | { type: 'START_GAME'; playerId: string; playerIds: Array<{ id: string; name: string; avatarId: string }> }
+    | { type: 'START_GAME'; playerId: string; playerIds: Array<{ id: string; name: string; avatarId: string }> } // Legacy SH Action
     | { type: 'NOMINATE_CHANCELLOR'; playerId: string; chancellorId: string }
     | { type: 'CAST_VOTE'; playerId: string; vote: Vote }
     | { type: 'DISCARD_POLICY'; playerId: string; policyIndex: number }
@@ -181,8 +150,14 @@ export type Action =
     | { type: 'CLOSE_ROOM'; playerId: string } // Host only
     | { type: 'ACKNOWLEDGE_ROLE'; playerId: string };
 
+export type PlatformAction =
+    | { type: 'SELECT_AVATAR'; roomId: string; playerId: string; avatarId: string }
+    | { type: 'VOTE_GAME'; roomId: string; playerId: string; gameId: string }
+    | { type: 'JOIN_ROOM'; roomId: string; playerId: string; avatarId?: string };
+
+
 // ============================================================================
-// EVENTS (Discriminated Union - UI-consumable)
+// EVENTS
 // ============================================================================
 
 export type GameEvent =
@@ -209,22 +184,17 @@ export type GameEvent =
     | { type: 'ERROR'; message: string };
 
 // ============================================================================
-// VALIDATION RESULT
+// MESSAGING
 // ============================================================================
 
-export interface ValidationResult {
-    valid: boolean;
-    error?: string;
-}
+export type ClientMessage = {
+    type: 'ACTION';
+    roomId: string;
+    action: Action | PlatformAction; // Support both
+    playerId: string;
+};
 
-// ============================================================================
-// REDUCER RETURN TYPE
-// ============================================================================
-
-export interface ReducerResult {
-    state: GameState;
-    events: GameEvent[];
-}
-
-export type GameState = SecretHitlerGameState;
-
+export type ServerMessage =
+    | { type: 'EVENT'; event: GameEvent }
+    | { type: 'STATE_SYNC'; state: RoomState } // Now expecting RoomState
+    | { type: 'ERROR'; message: string; code?: string };

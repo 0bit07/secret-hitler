@@ -38,16 +38,17 @@ async function runScenario() {
 
     // 2. Start Game with 5 players
     const players = [
-        { id: 'p1', name: 'Alice' },
-        { id: 'p2', name: 'Bob' },
-        { id: 'p3', name: 'Charlie' },
-        { id: 'p4', name: 'Dave' },
-        { id: 'p5', name: 'Eve' }
+        { id: 'p1', name: 'Alice', avatarId: 'avatar-01' },
+        { id: 'p2', name: 'Bob', avatarId: 'avatar-02' },
+        { id: 'p3', name: 'Charlie', avatarId: 'avatar-03' },
+        { id: 'p4', name: 'Dave', avatarId: 'avatar-04' },
+        { id: 'p5', name: 'Eve', avatarId: 'avatar-05' }
     ];
 
     log('Starting Game');
     const startResult = gameReducer(state, {
         type: 'START_GAME',
+        playerId: 'p1',
         playerIds: players
     });
 

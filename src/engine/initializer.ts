@@ -44,7 +44,8 @@ export function createLobbyState(ownerId: string | null = null): GameState {
         investigatedPlayers: [],
         winner: null,
         winReason: null,
-        playersInLobby: [],
+        playersInLobby: [] as Array<{ id: string; name: string; avatarId: string }>,
+        roleAcknowledgementCount: 0,
     };
 }
 
@@ -52,7 +53,7 @@ export function createLobbyState(ownerId: string | null = null): GameState {
  * Assign roles to players based on player count
  * Uses Fisher-Yates shuffle for randomness
  */
-export function assignRoles(playerIds: Array<{ id: string; name: string }>): Player[] {
+export function assignRoles(playerIds: Array<{ id: string; name: string; avatarId: string }>): Player[] {
     const playerCount = playerIds.length;
     const distribution = ROLE_DISTRIBUTION[playerCount];
 
@@ -74,6 +75,7 @@ export function assignRoles(playerIds: Array<{ id: string; name: string }>): Pla
     return playerIds.map((p, index) => ({
         id: p.id,
         name: p.name,
+        avatarId: p.avatarId,
         role: roles[index],
         party: roles[index] === Role.LIBERAL ? 'liberal' : 'fascist',
         alive: true,
@@ -81,6 +83,7 @@ export function assignRoles(playerIds: Array<{ id: string; name: string }>): Pla
         isChancellor: false,
         wasPresident: false,
         wasChancellor: false,
+        hasSeenRole: false,
     }));
 }
 
@@ -104,7 +107,7 @@ export function createPolicyDeck(): PolicyType[] {
  * Assigns roles, creates deck, sets first President
  */
 export function initializeGame(
-    playerIds: Array<{ id: string; name: string }>
+    playerIds: Array<{ id: string; name: string; avatarId: string }>
 ): { players: Player[]; policyDeck: PolicyType[]; presidentIndex: number } {
     const players = assignRoles(playerIds);
     const policyDeck = createPolicyDeck();

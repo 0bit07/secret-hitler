@@ -1,5 +1,4 @@
 import { createClient } from 'redis';
-import { GameState } from '../engine/types';
 import { mockRedisClient } from './mockRedisStore';
 
 // Initialize Redis client
@@ -54,7 +53,7 @@ function getGameKey(roomId: string): string {
 /**
  * Save game state to Redis with TTL
  */
-export async function saveGameState(roomId: string, state: GameState): Promise<void> {
+export async function saveGameState<T>(roomId: string, state: T): Promise<void> {
     const key = getGameKey(roomId);
     const serialized = JSON.stringify(state);
 
@@ -73,7 +72,7 @@ export async function saveGameState(roomId: string, state: GameState): Promise<v
 /**
  * Load game state from Redis
  */
-export async function loadGameState(roomId: string): Promise<GameState | null> {
+export async function loadGameState<T>(roomId: string): Promise<T | null> {
     const key = getGameKey(roomId);
     // @ts-ignore
     const data = await redisClient.get(key);
@@ -81,7 +80,7 @@ export async function loadGameState(roomId: string): Promise<GameState | null> {
     if (!data) return null;
 
     try {
-        return JSON.parse(data) as GameState;
+        return JSON.parse(data) as T;
     } catch (e) {
         console.error(`Failed to parse game state for room ${roomId}`, e);
         return null;
@@ -99,3 +98,4 @@ export async function gameExists(roomId: string): Promise<boolean> {
 
 // Export client for advanced usage if needed, but try to use wrappers
 export { redisClient };
+

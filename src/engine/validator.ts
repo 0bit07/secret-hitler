@@ -56,6 +56,8 @@ export function validateAction(state: GameState, action: Action): ValidationResu
             return validatePolicyPeek(state, action);
 
         case 'ADVANCE_PHASE':
+        case 'ACKNOWLEDGE_ROLE':
+        case 'CLOSE_ROOM':
             return { valid: true };
 
         default:

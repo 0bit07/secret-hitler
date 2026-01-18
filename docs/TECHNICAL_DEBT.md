@@ -36,3 +36,14 @@ This document tracks known issues, optimizations, and features that have been de
 ### 6. Code Duplication in Logic
 -   **Description:** Some validation logic might be repeated between `validator.ts` and individual logic files.
 -   **Plan:** Refactor to centralize common validation rules.
+
+### 7. Lobby Join Lag
+-   **Description:** Players sometimes experience a 4-5 second delay when joining a room before they appear in other players' lobby lists, despite the joining player seeing the "Joined" state locally.
+-   **Use Case:** Player A is host. Player B joins. Player B sees "Connected". Player A sees Player B's card appear 5 seconds later.
+-   **Impact:** Creates confusion and perceived unresponsiveness.
+-   **Plan:** Investigate WebSocket broadcast latency or state sync mechanism.
+
+### 8. Reconnect Race Condition
+-   **Description:** Rapidly reconnecting (e.g., changing username, reloading) can cause a race condition where the 'close' handler removes the new player if it executes its save after the 'connection' handler has added the new player.
+-   **Impact:** Player might be kicked out of the lobby immediately after joining or not appear at all.
+-   **Plan:** Implement atomic updates or strict locking for Game State modifications.

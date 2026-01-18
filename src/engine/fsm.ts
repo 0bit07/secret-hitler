@@ -36,8 +36,8 @@ export function isValidTransition(from: Phase, to: Phase): boolean {
  * Valid action types per phase
  */
 export const VALID_ACTIONS_PER_PHASE: Record<Phase, Action['type'][]> = {
-    [Phase.LOBBY]: ['START_GAME'],
-    [Phase.ROLE_REVEAL]: ['ADVANCE_PHASE'],
+    [Phase.LOBBY]: ['START_GAME', 'CLOSE_ROOM'],
+    [Phase.ROLE_REVEAL]: ['ADVANCE_PHASE', 'ACKNOWLEDGE_ROLE', 'CLOSE_ROOM'],
     [Phase.NOMINATION]: ['NOMINATE_CHANCELLOR'],
     [Phase.VOTING]: ['CAST_VOTE'],
     [Phase.LEGISLATIVE_PRESIDENT]: ['DISCARD_POLICY'],

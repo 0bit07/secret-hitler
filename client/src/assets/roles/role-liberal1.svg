@@ -1,0 +1,10 @@
+<svg width="300" height="500" viewBox="0 0 300 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="500" fill="#3498db" stroke="#2980b9" stroke-width="10"/>
+  <rect x="25" y="25" width="250" height="450" fill="#ecf0f1" rx="20"/>
+  <circle cx="150" cy="200" r="100" fill="#3498db" opacity="0.2"/>
+  <text x="150" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="40" fill="#2980b9">LIBERAL</text>
+  <text x="150" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#7f8c8d">YOU ARE ON THE BLUE TEAM</text>
+  <!-- Simple Dove Icon Placeholder -->
+  <path d="M150 150 L180 200 L120 200 Z" fill="#3498db"/>
+  <circle cx="150" cy="140" r="20" fill="#3498db"/>
+</svg>

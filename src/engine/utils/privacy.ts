@@ -22,6 +22,7 @@ export function sanitizeStateForPlayer(state: GameState, playerId: string): Part
     // Base sanitized state - reuse references where possible
     const sanitized: Partial<GameState> = {
         phase: state.phase,
+        ownerId: state.ownerId, // [NEW] Expose ownerId
         presidentIndex: state.presidentIndex,
         nominatedChancellor: state.nominatedChancellor,
         electionTracker: state.electionTracker,
@@ -30,27 +31,31 @@ export function sanitizeStateForPlayer(state: GameState, playerId: string): Part
         winner: state.winner,
         winReason: state.winReason,
         pendingExecutiveAction: state.pendingExecutiveAction,
+        roleAcknowledgementCount: state.roleAcknowledgementCount, // [NEW] Expose count
 
         // Hide roles of other players
         players: state.players.map(p => {
-            // Player can see their own role
+            // Player can see their own role - and their own ack status
             if (p.id === playerId) {
                 return p;
             }
 
+            // For all other players, mask hasSeenRole
+            const maskedAck = { ...p, hasSeenRole: false };
+
             // Fascists see other Fascists and Hitler (ALL non-Liberals)
             if (player.role === Role.FASCIST && p.role !== Role.LIBERAL) {
-                return p;
+                return maskedAck;
             }
 
             // Hitler sees Fascists ONLY in 5-6 player games
             if (player.role === Role.HITLER && p.role === Role.FASCIST && state.players.length <= 6) {
-                return p;
+                return maskedAck;
             }
 
             // Otherwise hide role/party
             return {
-                ...p,
+                ...maskedAck,
                 role: Role.LIBERAL, // Fake role
                 party: 'liberal' as const,
             };
@@ -90,6 +95,7 @@ export function sanitizeStateForPlayer(state: GameState, playerId: string): Part
 export function sanitizeStateForSpectator(state: GameState): Partial<GameState> {
     return {
         phase: state.phase,
+        ownerId: state.ownerId, // [NEW] Expose ownerId
         presidentIndex: state.presidentIndex,
         nominatedChancellor: state.nominatedChancellor,
         electionTracker: state.electionTracker,
@@ -97,6 +103,7 @@ export function sanitizeStateForSpectator(state: GameState): Partial<GameState> 
         fascistPoliciesEnacted: state.fascistPoliciesEnacted,
         winner: state.winner,
         winReason: state.winReason,
+        roleAcknowledgementCount: state.roleAcknowledgementCount, // [NEW]
         pendingExecutiveAction: state.pendingExecutiveAction,
 
         // Hide all roles
@@ -104,6 +111,7 @@ export function sanitizeStateForSpectator(state: GameState): Partial<GameState> 
             ...p,
             role: Role.LIBERAL,
             party: 'liberal' as const,
+            hasSeenRole: false // [NEW] Mask for spectators
         })),
 
         // Show votes only after all cast

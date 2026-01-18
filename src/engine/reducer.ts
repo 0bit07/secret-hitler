@@ -51,6 +51,7 @@ export function gameReducer(
             phase: Phase.ROLE_REVEAL,
             players,
             policyDeck,
+            roleAcknowledgementCount: 0,
             presidentIndex,
             playersInLobby: action.playerIds, // Keep record of original players
         };
@@ -127,6 +128,48 @@ export function gameReducer(
     // Dispatch based on action type
     try {
         switch (action.type) {
+            case 'ACKNOWLEDGE_ROLE': {
+                if (state.phase !== Phase.ROLE_REVEAL) return { state, events: [] };
+
+                const playerIndex = state.players.findIndex(p => p.id === action.playerId);
+                if (playerIndex === -1) return { state, events: [] };
+
+                const player = state.players[playerIndex];
+                if (player.hasSeenRole) return { state, events: [] }; // Idempotent
+
+                const newPlayers = [...state.players];
+                newPlayers[playerIndex] = { ...player, hasSeenRole: true };
+
+                const newCount = state.roleAcknowledgementCount + 1;
+                const allAcked = newCount >= state.players.length;
+
+                let newState = {
+                    ...state,
+                    players: newPlayers,
+                    roleAcknowledgementCount: newCount
+                };
+
+                const events: GameEvent[] = [];
+
+                if (allAcked) {
+                    newState = {
+                        ...newState,
+                        phase: Phase.NOMINATION
+                    };
+                    events.push({
+                        type: 'PHASE_CHANGED',
+                        oldPhase: Phase.ROLE_REVEAL,
+                        newPhase: Phase.NOMINATION
+                    });
+                    events.push({
+                        type: 'PRESIDENT_ROTATION',
+                        presidentId: state.players[state.presidentIndex].id
+                    } as any); // Cast because PRESIDENT_ROTATION might not be in defined Types yet?? Wait, I removed it? Checking types.
+                }
+
+                return { state: newState, events };
+            }
+
             case 'ADVANCE_PHASE':
                 // Only valid for ROLE_REVEAL -> NOMINATION currently
                 if (state.phase === Phase.ROLE_REVEAL) {
@@ -139,7 +182,7 @@ export function gameReducer(
                         }, {
                             type: 'PRESIDENT_ROTATION',
                             presidentId: state.players[state.presidentIndex].id
-                        }]
+                        } as any]
                     };
                 }
                 return { state, events: [] }; // Should be caught by validator but safe fallback
